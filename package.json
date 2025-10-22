@@ -1,0 +1,19 @@
+{
+  "name": "simple-crm",
+  "version": "1.0.0",
+  "description": "A simple CRM to send automated emails.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "@sendinblue/client": "^3.3.1",
+    "csv-parser": "^3.2.0",
+    "express": "^4.17.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^6.6.3"
+  }
+}

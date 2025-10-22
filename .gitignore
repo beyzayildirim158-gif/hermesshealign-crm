@@ -1,0 +1,21 @@
+# Node modules
+node_modules/
+
+# Upload klasörleri (geçici dosyalar)
+uploads/
+uploads/attachments/
+
+# Environment variables (şifreler burada olacak)
+.env
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
