@@ -161,17 +161,28 @@ app.delete('/api/members', (req, res) => {
 
 // API endpoint to send emails with attachments and inline images
 app.post('/api/send-email', uploadEmailFiles, async (req, res) => {
+    console.log('📧 Email send request received');
+    console.log('Request body:', req.body);
+    console.log('Files:', req.files);
+    
     const { subject, message, recipientIds, emailService } = req.body;
     const members = readMembers();
     
+    console.log(`📋 Total members: ${members.length}`);
+    console.log(`📨 Email service: ${emailService}`);
+    
     // Use the service selected from frontend, or fall back to server default
     const selectedService = emailService || global.CURRENT_EMAIL_SERVICE || EMAIL_SERVICE;
+    console.log(`✅ Selected service: ${selectedService}`);
     
     // Filter members based on selection
     let recipients = members;
     if (recipientIds) {
         const selectedIds = JSON.parse(recipientIds);
         recipients = members.filter(m => selectedIds.includes(m.id));
+        console.log(`🎯 Filtered to ${recipients.length} selected recipients`);
+    } else {
+        console.log(`📬 Sending to all ${recipients.length} members`);
     }
 
     let successCount = 0;
