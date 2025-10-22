@@ -23,12 +23,14 @@ const EMAIL_SERVICE = process.env.EMAIL_SERVICE || 'gmail';
 const TSOFT_CONFIG = {
     host: process.env.TSOFT_HOST || 'mail.hermesshealing.com',
     port: parseInt(process.env.TSOFT_PORT) || 587,
-    secure: process.env.TSOFT_SECURE === 'true',
+    secure: process.env.TSOFT_PORT === '465', // SSL için true
     user: process.env.TSOFT_USER || '',
     password: process.env.TSOFT_PASSWORD || '',
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    connectionTimeout: 10000, // 10 saniye timeout
+    greetingTimeout: 5000
 };
 
 // Brevo API Key
@@ -252,6 +254,13 @@ app.post('/api/send-email', uploadEmailFiles, async (req, res) => {
 
         } else if (selectedService === 'tsoft') {
             // ===== TSOFT (1POSTA.COM - TELEKOM) INTEGRATION =====
+            console.log('🔧 Creating Tsoft transporter with config:', {
+                host: TSOFT_CONFIG.host,
+                port: TSOFT_CONFIG.port,
+                secure: TSOFT_CONFIG.secure,
+                user: TSOFT_CONFIG.user
+            });
+            
             const transporter = nodemailer.createTransport({
                 host: TSOFT_CONFIG.host,
                 port: TSOFT_CONFIG.port,
@@ -261,12 +270,24 @@ app.post('/api/send-email', uploadEmailFiles, async (req, res) => {
                     pass: TSOFT_CONFIG.password
                 },
                 tls: TSOFT_CONFIG.tls,
+                connectionTimeout: TSOFT_CONFIG.connectionTimeout,
+                greetingTimeout: TSOFT_CONFIG.greetingTimeout,
                 pool: true,
-                maxConnections: 5, // Tsoft daha yüksek bağlantı sayısını destekler
+                maxConnections: 5,
                 maxMessages: 100,
                 rateDelta: 1000,
-                rateLimit: 5 // Saniyede 5 mail gönderebilir
+                rateLimit: 5
             });
+            
+            // Test connection
+            try {
+                console.log('🔌 Testing Tsoft SMTP connection...');
+                await transporter.verify();
+                console.log('✅ Tsoft SMTP connection verified!');
+            } catch (verifyError) {
+                console.error('❌ Tsoft SMTP connection failed:', verifyError);
+                throw new Error(`Tsoft SMTP bağlantısı başarısız: ${verifyError.message}`);
+            }
 
             // Prepare regular attachments
             const attachments = req.files?.attachments ? req.files.attachments.map(file => ({
